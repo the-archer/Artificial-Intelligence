@@ -1,0 +1,48 @@
+Hi all,
+
+Hope you are all having fun with the homework. Here are some clarifications for the issues regarding Homework-1 that are causing some confusions.
+
+1) In the "NOTES" section for input, there is an instruction: "For UCS, you can pop a node from the frontier only if the pipe from current node to that particular node is active at that time." Ignore this instruction and follow the algorithm in the book.
+
+2) DFS insertion order: There has been confusion regarding the DFS insertion order. The homework document says that you should insert the nodes in alphabetical order. But we are changing that in order to be consistent with the content discussed in discussion sections. So now, you have to insert the nodes in the frontier in reverse-alphabetical order for DFS. Nothing has changed for BFS and UCS, i.e. for BFS, you need to insert the nodes in alphabetical order and for UCS, when there is tie, you need to choose the node alphabetically.
+
+3) Time limit for code execution: We will announce the time limit soon once we decide on the final test cases.
+
+4) Time interval for off-times and reporting times: All the off-times for the final test cases will be in 0-23 hour format. Also, there won't be any cases of time wrap like 22-4, i.e. for all the off-times, the first integer will be always less than the second integer. Also, in the output, the time at which the water reaches the destination node has to be in 0-23 hour format.
+
+5) Upper bound for the number of nodes/pipes: There have been some queries regarding the maximum number of nodes/pipes that is possible in the graph. After consulting with Prof. Itti, we have decided that there is no upper bound on the number of nodes/pipes. The number of nodes/pipes is a positive integer.
+
+6) For questions regarding homework, Setareh and I will be holding office hours. Please don't come for questions regarding lectures during these office hours unless they are related to the homework. The timings are as following:
+
+Setareh: Monday 2-4 pm
+
+Siddharth: Monday 10:30 am-12:30 pm
+
+---------------------------------------------------------------------------------------------------------------------
+
+Hi all,
+
+It seems that many of you are still confused about the DFS implementation for homework-1.
+
+As per what we have said, you should stick to the algorithm in the book. The algorithm in the book is a recursive one. Also, as explained in the lectures, you can implement the same concept using an iterative version of the algorithm. You are welcome to use any of those as long as the output is the same as you would get from the recursive algorithm in the book.
+
+As for the order of visiting nodes for both versions of DFS, keep in mind that the basic concept is that you should explore the nodes in alphabetical order. So if you are using the recursive version, you should use the alphabetical order to call the recursive function. But if you are using the iterative version where you would use a frontier, you should push the nodes in the frontier in the reverse-alphabetical order. So that when they are popped, they are explored in the alphabetical order.
+
+Hopefully this clarifies all the confusion.
+
+The location for office hours for homework will be SAL Computer Center. You guys will have to find us. :)
+
+
+
+------------------------------------------------------------------------------------------------------------------
+
+Hi all,
+
+The two versions of DFS, i.e. recursive (as provided in book pg. 88) and iterative (as explained by Prof. Tejada in discussion sessions of week-2) may give different outputs for some cases. Therefore we will allow both the implementations and both outputs will be graded as correct.
+
+Also, as some of you wanted to use C++11 for the homework, we now enabled it on Vocareum. Make sure that the file extension is .cpp11 for those who wants their program to be compiled using c++11 compiler. So if you are using C++03, then you don't have to make any change. The execution sequence for C++11 code would be as following:
+
+g++ -std=c++11 waterFlow.cpp11 waterFlow.out
+./waterFlow.out -i inputFile
+
+Send me an email if you have issue running the C++11 code on Vocareum.
