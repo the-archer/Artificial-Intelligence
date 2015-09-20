@@ -1,5 +1,6 @@
 import sys, getopt
 import pprint
+from collections import deque
 
 
 def getInput(f1):
@@ -34,6 +35,36 @@ def getInput(f1):
 
 
 
+def BFS(data):
+	startnode = data[0]
+	goalnodes = data[1]
+	graph = data[2]
+	stime = data[3]
+	if startnode in goalnodes:
+		return (startnode, stime)
+	frontier = deque()
+	frontier.append((startnode, stime))
+	explored = set()
+	while True:
+		if len(frontier) == 0:
+			return ["None"]
+
+		node = frontier.popleft()
+		explored.add(node)
+		for edge in graph[node[0]]:
+			child = (edge[0], node[1]+1)
+			if child[0] not in explored and child[0] not in frontier:
+				if child[0] in goalnodes:
+					return child
+				frontier.append(child)
+
+
+
+
+
+
+
+
 
 
 
@@ -44,16 +75,23 @@ def main(argv):
 	for opt, arg in optlist:
 		if opt=="-i":
 			inputfile = arg
-
+	f2 = open("output.txt", "w")
+	f2.close()
 	with open(inputfile, "r") as f1:
 		tcases = int(f1.readline().rstrip('\n'))
 		case = 0
 		while case<tcases:
 			algo, data = getInput(f1)
 			pp = pprint.PrettyPrinter(indent=4)
-			pp.pprint(algo)
-			
-			pp.pprint(data)
+			#pp.pprint(algo)
+			#pp.pprint(data)
+			if algo == "BFS":
+				result = runBFS(data)
+			with open("output.txt", "a") as f2:
+				f2.write(result[0])
+				if len(result) > 1:
+					f2.write(" " + result[1])
+				f2.write('\n')
 			case += 1
 
 
