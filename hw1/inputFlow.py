@@ -35,7 +35,7 @@ def getInput(f1):
 
 
 
-def BFS(data):
+def runBFS(data):
 	startnode = data[0]
 	goalnodes = data[1]
 	graph = data[2]
@@ -53,6 +53,7 @@ def BFS(data):
 		explored.add(node)
 		for edge in graph[node[0]]:
 			child = (edge[0], node[1]+1)
+			print (child)
 			if child[0] not in explored and child[0] not in frontier:
 				if child[0] in goalnodes:
 					return child
@@ -90,7 +91,7 @@ def main(argv):
 			with open("output.txt", "a") as f2:
 				f2.write(result[0])
 				if len(result) > 1:
-					f2.write(" " + result[1])
+					f2.write(" " + str(result[1]))
 				f2.write('\n')
 			case += 1
 
