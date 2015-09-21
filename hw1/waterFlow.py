@@ -73,7 +73,7 @@ def runDFS(data):
 	return (recursive_DFS(node, goalnodes, graph, visited))
 
 def recursive_DFS(node, goalnodes, graph, visited):
-	print (node)
+	#print (node)
 	visited.append(node[0])
 	if node[0] in goalnodes:
 		return node
