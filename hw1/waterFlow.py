@@ -101,6 +101,7 @@ def runUCS(data):
 		if len(frontier) == 0:
 			return ("None", )
 		node = heappop(frontier)
+		#print (node)
 		if node[1] in goalnodes:
 			return (node[1], node[0]%24)
 		explored.add(node[1])
@@ -152,6 +153,7 @@ def main(argv):
 				result = runDFS(data)
 			elif algo == "UCS":
 				result = runUCS(data)
+				#print (result)
 			with open("output.txt", "a") as f2:
 				f2.write(result[0])
 				if len(result) > 1:
