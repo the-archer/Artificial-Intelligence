@@ -47,23 +47,19 @@ def runBFS(data):
 	explored = set()
 	while True:
 		if len(frontier) == 0:
-			return ["None"]
-
+			return ("None",)
+		#print (frontier)
 		node = frontier.popleft()
-		explored.add(node)
+		explored.add(node[0])
+		temp_frontier = []
 		for edge in graph[node[0]]:
-			child = (edge[0], node[1]+1)
-			print (child)
-			if child[0] not in explored and child[0] not in frontier:
+			child = (edge[0], (node[1]+1)%24)
+			#print (child[0])
+			if child[0] not in explored and child[0] not in [x[0] for x in frontier]:
 				if child[0] in goalnodes:
 					return child
-				frontier.append(child)
-
-
-
-
-
-
+				temp_frontier.append(child)
+		frontier.extend(sorted(temp_frontier))
 
 
 
