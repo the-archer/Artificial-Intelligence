@@ -62,6 +62,32 @@ def runBFS(data):
 		frontier.extend(sorted(temp_frontier))
 
 
+def runDFS(data):
+	startnode = data[0]
+	goalnodes = data[1]
+	graph = data[2]
+	stime = data[3]
+	visited = []
+	node = (startnode, stime)
+	return (recursive_DFS(node, goalnodes, graph, visited))
+
+def recursive_DFS(node, goalnodes, graph, visited):
+	visited.append(node[0])
+	if node[0] in goalnodes:
+		return node
+	else:
+		for child in sorted([x[0] for x in graph[node[0]]):
+			if child in visited:
+				continue
+			child_node = (child, (node[1]+1)%24)
+			result = recursive_DFS(child_node, goalnodes, graph, visited)
+			if len(result) > 1:
+				return result
+		return ("None",)
+
+
+
+
 
 
 
@@ -84,6 +110,8 @@ def main(argv):
 			#pp.pprint(data)
 			if algo == "BFS":
 				result = runBFS(data)
+			elif algo == "DFS":
+				result = runDFS(data)
 			with open("output.txt", "a") as f2:
 				f2.write(result[0])
 				if len(result) > 1:
