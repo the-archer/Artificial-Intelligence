@@ -1,6 +1,7 @@
 import sys, getopt
 import pprint
 from collections import deque
+from heapq import *
 
 
 def getInput(f1):
@@ -72,11 +73,12 @@ def runDFS(data):
 	return (recursive_DFS(node, goalnodes, graph, visited))
 
 def recursive_DFS(node, goalnodes, graph, visited):
+	print (node)
 	visited.append(node[0])
 	if node[0] in goalnodes:
 		return node
 	else:
-		for child in sorted([x[0] for x in graph[node[0]]):
+		for child in sorted([x[0] for x in graph[node[0]]]):
 			if child in visited:
 				continue
 			child_node = (child, (node[1]+1)%24)
@@ -84,6 +86,42 @@ def recursive_DFS(node, goalnodes, graph, visited):
 			if len(result) > 1:
 				return result
 		return ("None",)
+
+
+def runUCS(data):
+	startnode = data[0]
+	goalnodes = data[1]
+	graph = data[2]
+	stime = data[3]
+	node = (stime, startnode)
+	frontier = []
+	heappush(frontier, node)
+	explored = set()
+	while True:
+		if len(frontier) == 0:
+			return ("None", )
+		node = heappop(frontier)
+		if node[1] in goalnodes:
+			return (node[1], node[0]%24)
+		explored.add(node[1])
+		for edge in graph[node[1]]:
+			if edge[2][node[0]%24] == False:
+				continue
+			child = (node[0] + edge[1], edge[0])
+			if child[1] not in explored and child[1] not in [x[1] for x in frontier]:
+				heappush(frontier, child)
+			elif child[1] in [x[1] for x in frontier]:
+				j = -1
+				for i in range(0, len(frontier)):
+					if child[1] == frontier[i][1]:
+						if child[0] < frontier[i][0]:
+							j = i
+							break
+				if j >= 0:
+					frontier[j] = child
+					heapify(frontier)
+
+
 
 
 
@@ -112,6 +150,8 @@ def main(argv):
 				result = runBFS(data)
 			elif algo == "DFS":
 				result = runDFS(data)
+			elif algo == "UCS":
+				result = runUCS(data)
 			with open("output.txt", "a") as f2:
 				f2.write(result[0])
 				if len(result) > 1:
