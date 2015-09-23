@@ -10,3 +10,12 @@ None
 B 21
 B 20
 None
+D 1
+D 3
+None
+None
+D 6
+None
+C 13
+AA 0
+E 3

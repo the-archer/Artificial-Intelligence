@@ -1,4 +1,4 @@
-12
+21
 BFS
 A
 B C D
@@ -155,4 +155,108 @@ S A 2 0
 S B 1 0
 B G 1 1 1-2
 A B 2 0
+0
+
+DFS
+A
+D
+B C
+4
+A B 5 0
+B C 2 0
+C A 2 0
+A D 3 0
+0
+
+UCS
+A
+D
+B C
+4
+A B 5 0
+B C 2 0
+C A 2 0
+A D 3 0
+0
+
+DFS
+A
+B C D
+
+2
+B C 5 0
+C D 5 0
+0
+
+UCS
+A
+B C D
+
+2
+B C 5 0
+C D 5 0
+0
+
+UCS
+A
+D
+B C
+4
+A B 5 0
+A C 2 0
+B D 3 0
+C D 3 2 3-4 0-3
+22
+
+UCS
+A
+D
+B C
+4
+A B 5 0
+A C 2 0
+B D 3 1 0-10
+C D 3 2 3-4 2-3
+0
+
+UCS
+A
+C
+B F D E
+8
+A B 2 0
+B C 1 1 0-23
+D C 20 0
+E D 30 0
+F E 6 0
+F C 60 0 
+A F 5 0
+F B 0 0
+0
+
+UCS
+A
+AA F
+B C D E
+8
+A B 2 0
+A C 3 0
+B D 2 0
+B E 2 0
+D AA 0 0 
+E F 0 0
+D F 1 1 0-5
+C F 6 0
+20
+
+BFS
+A
+E
+B C D
+5
+A B 1 0
+A C 1 0
+B D 1 0
+C D 1 0 
+D E 1 0
 0

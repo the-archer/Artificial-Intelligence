@@ -53,7 +53,7 @@ def runBFS(data):
 		node = frontier.popleft()
 		explored.add(node[0])
 		temp_frontier = []
-		for edge in graph[node[0]]:
+		for edge in sorted([x for x in graph[node[0]]]):
 			child = (edge[0], (node[1]+1)%24)
 			#print (child[0])
 			if child[0] not in explored and child[0] not in [x[0] for x in frontier]:
@@ -160,14 +160,6 @@ def main(argv):
 					f2.write(" " + str(result[1]))
 				f2.write('\n')
 			case += 1
-
-
-
-
-
-
-
-
 
 
 
