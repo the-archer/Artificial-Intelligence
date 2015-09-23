@@ -52,15 +52,14 @@ def runBFS(data):
 		#print (frontier)
 		node = frontier.popleft()
 		explored.add(node[0])
-		temp_frontier = []
 		for edge in sorted([x for x in graph[node[0]]]):
 			child = (edge[0], (node[1]+1)%24)
 			#print (child[0])
 			if child[0] not in explored and child[0] not in [x[0] for x in frontier]:
 				if child[0] in goalnodes:
 					return child
-				temp_frontier.append(child)
-		frontier.extend(sorted(temp_frontier))
+				frontier.append(child)
+				
 
 
 def runDFS(data):
