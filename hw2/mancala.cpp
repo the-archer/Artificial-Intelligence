@@ -2,21 +2,33 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <climits>
+
 
 using namespace std;
 
-void MoveTestModule();
 
+struct Node
+{
+    int val;
+    int action;
+    Node* next;
+    Node(int x, int y) : val(x), action(y), next(NULL) {}
+};
 
 class Board
 {
 public:
     void printBoard(ofstream& outfile);
     Board(int pit_count);
-    void modify();
+
     Board(const Board &obj);
     bool MakeMove(int player, int pit);
     void setPit(int side, int pit, int val);
+    int getPit(int side, int pit);
+    int Utility(int player);
+    bool EndGameTest();
+    int getPitCount();
 
 private:
     int pit_count;
@@ -25,6 +37,11 @@ private:
 
 
 };
+
+
+void MoveTestModule();
+int MaxValue(Board b, int player, int depth, int max_depth);
+int MinValue(Board b, int player, int depth, int max_depth);
 
 Board::Board(const Board &obj)
 {
@@ -53,10 +70,7 @@ Board::Board(int p)
     }
 }
 
-void Board::modify()
-{
-    //pits[1] = 20;
-}
+
 
 void Board::setPit(int side, int pit, int val)
 {
@@ -68,6 +82,64 @@ void Board::setPit(int side, int pit, int val)
     {
         pits_t[pit] = val;
     }
+}
+
+int Board::getPit(int side, int pit)
+{
+    if(side == 1)
+    {
+        return pits_b[pit];
+    }
+    else
+    {
+        return pits_t[pit];
+    }
+}
+
+int Board::Utility(int player)
+{
+    if(player == 1)
+    {
+        return pits_b[pit_count-1] - pits_t[1];
+    }
+    else
+    {
+        return pits_t[1] - pits_b[pit_count-1];
+
+    }
+}
+
+bool Board::EndGameTest()
+{
+    int count1 = 0;
+    int count2 = 0;
+    for(int i=2; i<pit_count-1; i++)
+    {
+        count2 += pits_t[i];
+        count1 += pits_b[i];
+
+        if(pits_t[i]!=0 || pits_b[i]!=0)
+        {
+            return false;
+
+        }
+
+
+    }
+    if(count1 == 0)
+    {
+        pits_t[1] += count2;
+    }
+    if(count2 == 0)
+    {
+        pits_b[pit_count-1] += count1;
+    }
+    return true;
+}
+
+int Board::getPitCount()
+{
+    return pit_count;
 }
 
 void Board::printBoard(ofstream& outfile)
@@ -205,12 +277,6 @@ bool Board::MakeMove(int player, int pit)
 
 
 
-void testFunction(Board b)
-{
-    b.modify();
-    //b.getBoard();
-
-}
 
 
 int main()
@@ -219,9 +285,56 @@ int main()
     //Board b(5);
     //testFunction(b);
     //b.getBoard();
-    MoveTestModule();
+    //MoveTestModule();
+    ifstream infile("input_2.txt"); // Change it to take input file name from command line -> IMPORTANT
+    int algo, player, max_depth;
+    infile >> algo;
+    infile >> player;
+    infile >> max_depth;
+    cout << "here" << endl;
+    string line;
+    int arr[15];
+    infile.ignore(255, '\n');
+    getline(infile, line);
+    cout << line << endl;
+    istringstream iss(line);
+    int n;
+    int i = 0;
+    while (iss >> n)
+    {
+        arr[i] = n;
+        i++;
+    }
+    Board b(i+3);
+    for(int j=0; j<i; j++)
+    {
+            b.setPit(2, j+2, arr[j]);
+    }
+    getline(infile, line);
+    istringstream iss2(line);
+    int j = 0;
+    while(iss2 >> n)
+    {
+        //cout << n << endl;
+        b.setPit(1, j+2, n);
+        j++;
+    }
+    infile >> n;
+    b.setPit(2,1,n);
+    infile >> n;
+    b.setPit(1, i+2, n);
+    ofstream outfile("output.txt");
+
+    b.printBoard(outfile);
+    if(algo == 2)
+    {
+
+    }
+
     return 0;
 }
+
+
 
 void MoveTestModule()
 {
@@ -267,4 +380,102 @@ void MoveTestModule()
     cout << b.MakeMove(player, pit) << endl;
     b.printBoard(outfile);
 
+}
+
+void MiniMaxDecision(Board b, int player, int max_depth)
+{
+    int val = INT_MIN;
+    int res = 0;
+    for(int i=2; i<(b.getPitCount()-1); i++)
+    {
+        if(b.getPit(player, i)!=0)
+        {
+            if(b.MakeMove(player, i))
+            {
+                res = MaxValue(b, player, 0, max_depth);
+
+            }
+            else
+            {
+                res = MinValue(b, (player%2)+1, 1, max_depth);
+            }
+            if(res > val)
+            {
+                val = res;
+            }
+
+        }
+    }
+}
+
+pair<int, Node> MaxValue(Board b, int player, int depth, int max_depth)
+{
+    if(b.EndGameTest())
+    {
+        return b.Utility(player);
+    }
+    if(depth > max_depth)
+    {
+        return b.Utility(player);
+    }
+    int val = INT_MIN;
+    int res = 0;
+    int action = 0;
+    for(int i=2; i<(b.getPitCount()-1); i++)
+    {
+        if(b.getPit(player, i)!=0)
+        {
+            if(b.MakeMove(player, i))
+            {
+                res = MaxValue(b, player, depth, max_depth);
+
+            }
+            else
+            {
+                res = MinValue(b, (player%2)+1, depth+1, max_depth);
+            }
+            if(res > val)
+            {
+                val = res;
+                action = i;
+            }
+
+        }
+    }
+    return val;
+}
+
+pair<int, Node> MinValue(Board b, int player, int depth, int max_depth)
+{
+    if(b.EndGameTest())
+    {
+        return make_pair(b.Utility((player%2)+1), Node(0, 0));
+    }
+    if(depth > max_depth)
+    {
+        return make_pair(b.Utility((player%2)+1), Node(0, 0));
+    }
+    int val = INT_MAX;
+    pair<int, Node> res;
+    for(int i=2; i<(b.getPitCount()-1); i++)
+    {
+        if(b.getPit(player, i)!=0)
+        {
+            if(b.MakeMove(player, i))
+            {
+                res = MinValue(b, player, depth, max_depth);
+
+            }
+            else
+            {
+                res = MaxValue(b, (player%2)+1, depth+1, max_depth);
+            }
+            if(res < val)
+            {
+                val = res;
+            }
+
+        }
+    }
+    return val;
 }
