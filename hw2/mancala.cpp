@@ -8,6 +8,8 @@
 using namespace std;
 
 bool traverse_log = true;
+bool alpha_beta = false;
+fstream fs;
 
 struct Node
 {
@@ -42,9 +44,9 @@ private:
 
 void MoveTestModule();
 void MiniMaxDecision(Board b, int player, int max_depth);
-pair<int, Node*> MaxValue(Board b, int player, int depth, int max_depth, int prev_player, int prev_move);
-pair<int, Node*> MinValue(Board b, int player, int depth, int max_depth,int prev_player, int prev_move);
-void addTraverseLog(int player, int pit, int depth, int val);
+pair<int, Node*> MaxValue(Board b, int player, int depth, int max_depth, int prev_player, int prev_move, int alpha, int beta);
+pair<int, Node*> MinValue(Board b, int player, int depth, int max_depth,int prev_player, int prev_move, int alpha, int beta);
+void addTraverseLog(int player, int pit, int depth, int val, int alpha, int beta);
 
 
 Board::Board(const Board &obj)
@@ -147,6 +149,7 @@ bool Board::EndGameTest()
         pits_b[i] = 0;
         pits_t[i] = 0;
     }
+    //cout << "Game End" << endl;
     return true;
 }
 
@@ -158,15 +161,17 @@ int Board::getPitCount()
 void Board::printBoard(ofstream& outfile)
 {
     //outfile << pit_count << endl;
-    for(int i=2; i<pit_count-1; i++)
+    for(int i=2; i<pit_count-2; i++)
     {
         outfile << pits_t[i] <<  " " ;
     }
+    outfile << pits_t[pit_count-2];
     outfile << endl;
-    for(int i=2; i<pit_count-1; i++)
+    for(int i=2; i<pit_count-2; i++)
     {
         outfile << pits_b[i] <<  " " ;
     }
+    outfile << pits_b[pit_count-2];
     outfile << endl;
     outfile << pits_t[1] << endl;
     outfile << pits_b[pit_count-1] << endl;
@@ -293,7 +298,7 @@ bool Board::MakeMove(int player, int pit)
 
 
 
-int main()
+int main(int argc,char *argv[])
 {
 
     //Board b(5);
@@ -301,17 +306,17 @@ int main()
     //b.getBoard();
    // MoveTestModule();
 
-    ifstream infile("test_input.txt"); // Change it to take input file name from command line -> IMPORTANT
+    ifstream infile(argv[2]); // Change it to take input file name from command line -> IMPORTANT
     int algo, player, max_depth;
     infile >> algo;
     infile >> player;
     infile >> max_depth;
-    cout << "here" << endl;
+    //cout << "here" << endl;
     string line;
     int arr[15];
     infile.ignore(255, '\n');
     getline(infile, line);
-    cout << line << endl;
+    //cout << line << endl;
     istringstream iss(line);
     int n;
     int i = 0;
@@ -344,19 +349,35 @@ int main()
     {
         //greedy
         traverse_log = false;
+        alpha_beta = false;
         MiniMaxDecision(b, player, 1);
 
     }
     else if(algo == 2)
     {
         traverse_log = true;
-        fstream fs;
+        alpha_beta = false;
+        //fstream fs;
         fs.open("traverse_log.txt", ios_base::out); // NOTE: OPen file at the start to overwrite any previous logs and insert heading
         fs << "Node,Depth,Value" << endl;
-        fs.close();
+        //fs.close();
 
         MiniMaxDecision(b, player, max_depth);
+        fs.close();
     }
+    else if(algo == 3)
+    {
+        traverse_log = true;
+        alpha_beta = true;
+        //fstream fs;
+        fs.open("traverse_log.txt", ios_base::out); // NOTE: OPen file at the start to overwrite any previous logs and insert heading
+        fs << "Node,Depth,Value,Alpha,Beta" << endl;
+        //fs.close();
+
+        MiniMaxDecision(b, player, max_depth);
+        fs.close();
+    }
+
 
     return 0;
 }
@@ -415,10 +436,10 @@ void MoveTestModule()
 void MiniMaxDecision(Board b, int player, int max_depth)
 {
 
-    pair<int, Node*> res = MaxValue(b, player, 0, max_depth, 0, 0);
+    pair<int, Node*> res = MaxValue(b, player, 0, max_depth, 0, 0, INT_MIN, INT_MAX);
     Node* cur = res.second;
     ofstream outfile("next_state.txt");
-    cout << res.first << endl;
+    //cout << res.first << endl;
     while(cur!=NULL)
     {
         //cout << "Action" << cur->action << endl;
@@ -437,7 +458,7 @@ void MiniMaxDecision(Board b, int player, int max_depth)
 
 }
 
-pair<int, Node*> MaxValue(Board b, int player, int depth, int max_depth, int prev_player, int prev_move)
+pair<int, Node*> MaxValue(Board b, int player, int depth, int max_depth, int prev_player, int prev_move, int alpha, int beta)
 {
     int newdepth = depth;
     if (player!=prev_player)
@@ -448,14 +469,14 @@ pair<int, Node*> MaxValue(Board b, int player, int depth, int max_depth, int pre
     {
         Node* node = new Node(0, 0);
         int val = b.Utility(player);
-        addTraverseLog(prev_player, prev_move, depth, val);
+        addTraverseLog(prev_player, prev_move, depth, val, alpha, beta);
         return make_pair(val, node);
     }
     if(newdepth > max_depth)
     {
         Node* node = new Node(0, 0);
         int val = b.Utility(player);
-        addTraverseLog(prev_player, prev_move, depth, val);
+        addTraverseLog(prev_player, prev_move, depth, val, alpha, beta);
         return make_pair(val, node);
     }
     int val = INT_MIN;
@@ -464,7 +485,7 @@ pair<int, Node*> MaxValue(Board b, int player, int depth, int max_depth, int pre
     Node* future_actions;
 
 
-    addTraverseLog(prev_player, prev_move, depth, val);
+    addTraverseLog(prev_player, prev_move, depth, val, alpha, beta);
     for(int i=2; i<(b.getPitCount()-1); i++)
     {
         if(b.getPit(player, i)!=0)
@@ -472,13 +493,13 @@ pair<int, Node*> MaxValue(Board b, int player, int depth, int max_depth, int pre
             Board c = b;
             if(c.MakeMove(player, i))
             {
-                res = MaxValue(c, player, newdepth, max_depth, player, i);
+                res = MaxValue(c, player, newdepth, max_depth, player, i, alpha, beta);
 
 
             }
             else
             {
-                res = MinValue(c, (player%2)+1, newdepth, max_depth, player, i);
+                res = MinValue(c, (player%2)+1, newdepth, max_depth, player, i, alpha, beta);
             }
             if(res.first > val)
             {
@@ -486,12 +507,24 @@ pair<int, Node*> MaxValue(Board b, int player, int depth, int max_depth, int pre
                 action = i;
                 future_actions = res.second;
             }
-            addTraverseLog(prev_player, prev_move, depth, val);
+            if(alpha_beta)
+            {
+                if(val >= beta)
+                {
+                    addTraverseLog(prev_player, prev_move, depth, val, alpha, beta);
+                    break;
+                }
+                if(val > alpha)
+                {
+                    alpha = val;
+                }
+            }
+            addTraverseLog(prev_player, prev_move, depth, val, alpha, beta);
 
         }
 
     }
-    cout << val << endl;
+    //cout << val << endl;
     if(newdepth==1)
     {
         Node* node = new Node(val, action);
@@ -501,7 +534,7 @@ pair<int, Node*> MaxValue(Board b, int player, int depth, int max_depth, int pre
     return make_pair(val, res.second);
 }
 
-pair<int, Node*> MinValue(Board b, int player, int depth, int max_depth, int prev_player, int prev_move)
+pair<int, Node*> MinValue(Board b, int player, int depth, int max_depth, int prev_player, int prev_move, int alpha, int beta)
 {
     int newdepth = depth;
 
@@ -515,20 +548,20 @@ pair<int, Node*> MinValue(Board b, int player, int depth, int max_depth, int pre
     {
         Node* node = new Node(0, 0);
         int val = b.Utility((player%2)+1);
-        addTraverseLog(prev_player, prev_move, depth, val);
+        addTraverseLog(prev_player, prev_move, depth, val, alpha, beta);
         return make_pair(val, node);
     }
     if(newdepth > max_depth)
     {
         Node* node = new Node(0, 0);
         int val = b.Utility((player%2)+1);
-        addTraverseLog(prev_player, prev_move, depth, val);
+        addTraverseLog(prev_player, prev_move, depth, val, alpha, beta);
         return make_pair(val, node);
     }
     int val = INT_MAX;
     pair<int, Node*> res;
 
-    addTraverseLog(prev_player, prev_move, depth, val);
+    addTraverseLog(prev_player, prev_move, depth, val, alpha, beta);
 
 
     for(int i=2; i<(b.getPitCount()-1); i++)
@@ -539,33 +572,45 @@ pair<int, Node*> MinValue(Board b, int player, int depth, int max_depth, int pre
 
             if(c.MakeMove(player, i))
             {
-                res = MinValue(c, player, newdepth, max_depth, player, i);
+                res = MinValue(c, player, newdepth, max_depth, player, i, alpha, beta);
 
             }
             else
             {
-                res = MaxValue(c, (player%2)+1, newdepth, max_depth, player, i);
+                res = MaxValue(c, (player%2)+1, newdepth, max_depth, player, i, alpha, beta);
             }
             if(res.first < val)
             {
                 val = res.first;
             }
-            addTraverseLog(prev_player, prev_move, depth, val);
+            if(alpha_beta)
+            {
+                if(val <= alpha)
+                {
+                    addTraverseLog(prev_player, prev_move, depth, val, alpha, beta);
+                    break;
+                }
+                if(val < beta)
+                {
+                    beta = val;
+                }
+            }
+            addTraverseLog(prev_player, prev_move, depth, val, alpha, beta);
 
 
         }
 
     }
-    cout << val << endl;
+    //cout << val << endl;
     return make_pair(val, res.second);
 }
 
-void addTraverseLog(int player, int pit, int depth, int val)
+void addTraverseLog(int player, int pit, int depth, int val, int alpha, int beta)
 {
     if(!traverse_log)
         return;
-    ofstream fs;
-    fs.open("traverse_log.txt", ios_base::app); // NOTE: OPen file at the start to overwrite any previous logs and insert heading
+    //ofstream fs;
+    //fs.open("traverse_log.txt", ios_base::app); // NOTE: OPen file at the start to overwrite any previous logs and insert heading
 
     //fs << "simrat " << endl;
     if(player==0)
@@ -587,18 +632,50 @@ void addTraverseLog(int player, int pit, int depth, int val)
     fs << depth << "," ;
     if(val==INT_MAX)
     {
-        fs << "Infinity" << endl;
+        fs << "Infinity";
 
     }
     else if(val==INT_MIN)
     {
-        fs << "-Infinity" << endl;
+        fs << "-Infinity" ;
     }
     else
     {
-        fs << val << endl;
+        fs << val;
     }
-    fs.close();
+    if(alpha_beta)
+    {
+        fs << ",";
+        if(alpha==INT_MAX)
+        {
+            fs << "Infinity";
+
+        }
+        else if(alpha==INT_MIN)
+        {
+            fs << "-Infinity";
+        }
+        else
+        {
+            fs << alpha;
+        }
+        fs << ",";
+        if(beta==INT_MAX)
+        {
+            fs << "Infinity" ;
+
+        }
+        else if(beta==INT_MIN)
+        {
+            fs << "-Infinity";
+        }
+        else
+        {
+            fs << beta;
+        }
+    }
+    fs << endl;
+    //fs.close();
     //cout << "here" << endl;
     return;
 
