@@ -1,0 +1,7 @@
+Hi
+
+All queries in the input file are single argument, will there be queries with more than one argument? Like B(John,Bob)?
+
+Thanks
+
+ANS: Yes. It's possible to have more than one argument in the query. 
