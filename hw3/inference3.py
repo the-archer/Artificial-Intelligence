@@ -14,26 +14,47 @@ class KB():
 		self.clauses = {}
 
 	def tell(self, sentence):
-		return
+		clause = parseRule(sentence)
+		if clause[0][0:2] in self.clauses:
+			self.clauses[clause[0][0:2]].append(clause)
+		else:
+			self.clauses[clause[0][0:2]] = [clause]
+		print("---------------")
+		pprint.pprint(self.clauses)
 
 
+def parseRule(s):
+	p1 = re.compile(r"(.+)=>(.+)")
+	m = p1.search(s)
+	if m:
+		rhs = parseLiteral(m.group(2).lstrip())
+		lhs_lit = m.group(1).split('^')
+		lhs = []
+		for lit in lhs_lit:
+			lhs.append(parseLiteral(lit.strip()))
+		return ((rhs, lhs))
+	else:
+		return ((parseLiteral(s.strip()), []))
 
 
-def parseQuery(s):
+def parseLiteral(s):
 	q = re.compile(r"(~?\w+)\((.+)\)")
 	m = q.match(s)
 	if m:
 		arg = m.group(2).split(',')
 		argtup = []
 		for a in arg:
-			argtup.append((a, 'c'))
+			if a[0].isupper():
+				argtup.append((a, 'c'))
+			else:
+				argtup.append((a, 'v'))
 		if m.group(1)[0] == '~':
 			return (m.group(1)[1:], False, argtup)
 		else:
 			return (m.group(1), True, argtup)
 
 	else:
-		print("Error parsing query")
+		print("Error parsing literal")
 		return ("", True, [])
 
 
@@ -45,7 +66,7 @@ def getInput(inputfile):
 		qno = 0
 		while qno < qcount:
 			line = f1.readline().rstrip('\n')
-			query.append(parseQuery(line))
+			query.append(parseLiteral(line))
 			qno += 1
 		rcount = int(f1.readline())
 		rno = 0
@@ -64,7 +85,7 @@ def main(argv):
 	f2 = open("output.txt", "w")
 	f2.close()
 	query, kb = getInput(inputfile)
-	pprint.pprint(query)
+	# pprint.pprint(query)
 
 if __name__ == "__main__":
 	main(sys.argv[1:])
