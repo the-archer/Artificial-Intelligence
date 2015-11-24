@@ -5,6 +5,7 @@
 import re
 import sys
 import getopt
+import pprint
 
 
 class KB():
@@ -52,6 +53,7 @@ def getInput(inputfile):
 			line = f1.readline().rstrip('\n')
 			kb.tell(line)
 			rno += 1
+	return (query, kb)
 
 
 def main(argv):
@@ -62,7 +64,7 @@ def main(argv):
 	f2 = open("output.txt", "w")
 	f2.close()
 	query, kb = getInput(inputfile)
-
+	pprint.pprint(query)
 
 if __name__ == "__main__":
 	main(sys.argv[1:])
