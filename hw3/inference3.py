@@ -75,7 +75,21 @@ def getInput(inputfile):
 	return (query, kb)
 
 
+def unify_test():
+	with open("unif_test.txt", "r") as f1:
+		a = parseLiteral(f1.readline().strip())
+		b = parseLiteral(f1.readline().strip())
+		q = unify(a[2], b[2], {"meta_fail": False})
+		if q["meta_fail"]:
+			print("failed to unify")
+		pprint.pprint(q)
+
+
 def unify(x, y, theta):
+	# pprint.pprint(x)
+	# pprint.pprint(y)
+	# pprint.pprint(theta)
+	# print("-------------")
 	if theta["meta_fail"]:
 		return {"meta_fail": True}
 	elif x == y:
@@ -92,9 +106,9 @@ def unify(x, y, theta):
 
 def unify_var(var, x, theta):
 	if var in theta:
-		return unify(theta[var], x, theta)
+		return unify([theta[var]], [x], theta)
 	elif x in theta:
-		return unify(var, theta[x], theta)
+		return unify([var], [theta[x]], theta)
 	else:
 		theta[var] = x
 		return theta
@@ -111,4 +125,5 @@ def main(argv):
 	# pprint.pprint(query)
 
 if __name__ == "__main__":
-	main(sys.argv[1:])
+	# main(sys.argv[1:])
+	unify_test()
