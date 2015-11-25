@@ -7,6 +7,7 @@ import sys
 import getopt
 import pprint
 
+var_count = 0
 
 class KB():
 
@@ -15,6 +16,7 @@ class KB():
 
 	def tell(self, sentence):
 		clause = parseRule(sentence)
+		standardize_test(clause)
 		if clause[0][0:2] in self.clauses:
 			self.clauses[clause[0][0:2]].append(clause)
 		else:
@@ -43,9 +45,9 @@ def parseLiteral(s):
 		argtup = []
 		for a in arg:
 			if a[0].isupper():
-				argtup.append((a, 'c'))
+				argtup.append([a, 'c'])
 			else:
-				argtup.append((a, 'v'))
+				argtup.append([a, 'v'])
 		if m.group(1)[0] == '~':
 			return (m.group(1)[1:], False, argtup)
 		else:
@@ -114,6 +116,27 @@ def unify_var(var, x, theta):
 		return theta
 
 
+def standardize_test(rule):
+	rule2 = standardize_variables(rule)	
+	pprint.pprint(rule2)
+
+
+def standardize_variables(rule):
+	# print(rule)
+	global var_count
+	var_count += 1
+	for i, arg in enumerate(rule[0][2]):
+		if arg[1] == 'v':
+			cur = rule[0][2][i][0][0]
+			rule[0][2][i][0] = cur + str(var_count)
+	for j in range(len(rule[1])):
+		for i, arg in enumerate(rule[1][j][2]):
+			if arg[1] == 'v':
+				cur = rule[1][j][2][i][0][0]
+				rule[1][j][2][i][0] = cur + str(var_count)
+	return rule
+
+
 def main(argv):
 	optlist, args = getopt.getopt(argv, 'i:')
 	for opt, arg in optlist:
@@ -125,5 +148,5 @@ def main(argv):
 	# pprint.pprint(query)
 
 if __name__ == "__main__":
-	# main(sys.argv[1:])
-	unify_test()
+	main(sys.argv[1:])
+	# unify_test()
