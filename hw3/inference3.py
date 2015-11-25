@@ -22,6 +22,10 @@ class KB():
 		else:
 			self.clauses[clause[0][0:2]] = [clause]
 
+	def fetch_rules_for_goal(self, goal):
+		if goal[0:2] in self.clauses:
+			for rule in self.clauses[goal[0:2]]:
+				yield rule
 
 def parseRule(s):
 	p1 = re.compile(r"(.+)=>(.+)")
@@ -45,9 +49,9 @@ def parseLiteral(s):
 		argtup = []
 		for a in arg:
 			if a[0].isupper():
-				argtup.append([a, 'c'])
+				argtup.append((a, 'c'))
 			else:
-				argtup.append([a, 'v'])
+				argtup.append((a, 'v'))
 		if m.group(1)[0] == '~':
 			return (m.group(1)[1:], False, argtup)
 		else:
@@ -107,6 +111,9 @@ def unify(x, y, theta):
 
 
 def unify_var(var, x, theta):
+	# pprint.pprint(var)
+	# pprint.pprint(x)
+	# pprint.pprint(theta)
 	if var in theta:
 		return unify([theta[var]], [x], theta)
 	elif x in theta:
@@ -117,7 +124,7 @@ def unify_var(var, x, theta):
 
 
 def standardize_test(rule):
-	rule2 = standardize_variables(rule)	
+	rule2 = standardize_variables(rule)
 	pprint.pprint(rule2)
 
 
@@ -128,13 +135,46 @@ def standardize_variables(rule):
 	for i, arg in enumerate(rule[0][2]):
 		if arg[1] == 'v':
 			cur = rule[0][2][i][0][0]
-			rule[0][2][i][0] = cur + str(var_count)
+			rule[0][2][i] = (cur + str(var_count), 'v')
 	for j in range(len(rule[1])):
 		for i, arg in enumerate(rule[1][j][2]):
 			if arg[1] == 'v':
 				cur = rule[1][j][2][i][0][0]
-				rule[1][j][2][i][0] = cur + str(var_count)
+				rule[1][j][2][i] = (cur + str(var_count), 'v')
 	return rule
+
+
+def fol_bc_or(kb, goal, theta):
+	for rule in kb.fetch_rules_for_goal(goal):
+		rhs, lhs = standardize_variables(rule)
+		for theta1 in fol_bc_and(kb, lhs, unify(rhs[2], goal[2], theta)):
+			yield theta1
+
+def fol_bc_and(kb, goals, theta):
+	if theta["meta_fail"]:
+		return
+	elif len(goals) == 0:
+		yield theta
+	else:
+		first = goals[0]
+		rest = goals[1:]
+		for theta1 in fol_bc_or(kb, substitute(theta, first), theta):
+			for theta2 in fol_bc_and(kb, rest, theta1):
+				yield theta2
+
+
+def substitute(theta, clause):
+	args = []
+	for arg in clause[2]:
+		if arg[1] == 'v' and arg[0] in theta:
+			args.append(theta[arg[0]])
+		else:
+			args.append(arg)
+	return (clause[0], clause[1], args)
+
+
+def fol_bc_ask(kb, query):
+	return fol_bc_or(kb, query, {"meta_fail": False})
 
 
 def main(argv):
@@ -148,5 +188,5 @@ def main(argv):
 	# pprint.pprint(query)
 
 if __name__ == "__main__":
-	main(sys.argv[1:])
-	# unify_test()
+	# main(sys.argv[1:])
+	unify_test()
