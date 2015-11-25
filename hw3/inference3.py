@@ -19,8 +19,6 @@ class KB():
 			self.clauses[clause[0][0:2]].append(clause)
 		else:
 			self.clauses[clause[0][0:2]] = [clause]
-		print("---------------")
-		pprint.pprint(self.clauses)
 
 
 def parseRule(s):
@@ -75,6 +73,31 @@ def getInput(inputfile):
 			kb.tell(line)
 			rno += 1
 	return (query, kb)
+
+
+def unify(x, y, theta):
+	if theta["meta_fail"]:
+		return {"meta_fail": True}
+	elif x == y:
+		return theta
+	elif len(x) == 1 and x[0][1] == 'v' and len(y) == 1:
+		return unify_var(x[0], y[0], theta)
+	elif len(y) == 1 and y[0][1] == 'v' and len(x) == 1:
+		return unify_var(y[0], x[0], theta)
+	elif len(x) > 1 and len(y) > 1:
+		return unify(x[1:], y[1:], unify(x[:1], y[:1], theta))
+	else:
+		return {"meta_fail": True}
+
+
+def unify_var(var, x, theta):
+	if var in theta:
+		return unify(theta[var], x, theta)
+	elif x in theta:
+		return unify(var, theta[x], theta)
+	else:
+		theta[var] = x
+		return theta
 
 
 def main(argv):
