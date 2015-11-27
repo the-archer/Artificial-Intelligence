@@ -1,0 +1,7 @@
+1
+H(Paul)
+4
+A(y) ^ B(y) => H(x)
+A(Bob)
+A(Sim)
+B(Sim)

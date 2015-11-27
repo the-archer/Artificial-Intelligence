@@ -6,8 +6,10 @@ import re
 import sys
 import getopt
 import pprint
+from copy import deepcopy
 
 var_count = 0
+
 
 class KB():
 
@@ -16,16 +18,24 @@ class KB():
 
 	def tell(self, sentence):
 		clause = parseRule(sentence)
-		standardize_test(clause)
+		# standardize_test(clause)
 		if clause[0][0:2] in self.clauses:
 			self.clauses[clause[0][0:2]].append(clause)
 		else:
 			self.clauses[clause[0][0:2]] = [clause]
 
 	def fetch_rules_for_goal(self, goal):
+		# print ("goal" + str(goal))
 		if goal[0:2] in self.clauses:
+			# print ("here")
 			for rule in self.clauses[goal[0:2]]:
+				# print ("Rule" + str(rule))
 				yield rule
+				# return rule
+
+	def printKB(self):
+		pprint.pprint(self.clauses)
+
 
 def parseRule(s):
 	p1 = re.compile(r"(.+)=>(.+)")
@@ -96,9 +106,11 @@ def unify(x, y, theta):
 	# pprint.pprint(y)
 	# pprint.pprint(theta)
 	# print("-------------")
+	theta = deepcopy(theta)
 	if theta["meta_fail"]:
 		return {"meta_fail": True}
 	elif x == y:
+		# nt ("test")
 		return theta
 	elif len(x) == 1 and x[0][1] == 'v' and len(y) == 1:
 		return unify_var(x[0], y[0], theta)
@@ -111,6 +123,7 @@ def unify(x, y, theta):
 
 
 def unify_var(var, x, theta):
+	theta = deepcopy(theta)
 	# pprint.pprint(var)
 	# pprint.pprint(x)
 	# pprint.pprint(theta)
@@ -124,8 +137,8 @@ def unify_var(var, x, theta):
 
 
 def standardize_test(rule):
-	rule2 = standardize_variables(rule)
-	pprint.pprint(rule2)
+	rule = standardize_variables(rule)
+	# pprint.pprint(rule2)
 
 
 def standardize_variables(rule):
@@ -144,37 +157,67 @@ def standardize_variables(rule):
 	return rule
 
 
-def fol_bc_or(kb, goal, theta):
+def fol_bc_or(kb, goal, theta, parentgoals):
+	# pprint.pprint(goal)
+	# pprint.pprint(theta)
+	# print("-----------")
+	# print (goal)
+	thetan = deepcopy(theta)
+	parentgoalsn = deepcopy(parentgoals)
+	for arg in goal[2]:
+		if arg[1] == 'v':
+			break
+	else:  # no-break
+		if goal in parentgoalsn:
+			thetan["meta_fail"] = True
+			yield thetan
+	parentgoalsn.append(goal)
 	for rule in kb.fetch_rules_for_goal(goal):
 		rhs, lhs = standardize_variables(rule)
-		for theta1 in fol_bc_and(kb, lhs, unify(rhs[2], goal[2], theta)):
+		# print("goal:" + str(goal))
+		# print(rhs)
+		# print(lhs)
+		# print("theta: "+ str(thetan))
+		for theta1 in fol_bc_and(kb, lhs, unify(rhs[2], goal[2], thetan), parentgoalsn):
+			# print("theta1: " + str(theta))
 			yield theta1
 
-def fol_bc_and(kb, goals, theta):
-	if theta["meta_fail"]:
+
+def fol_bc_and(kb, goals, theta, parentgoals):
+	# print(goals)
+	# print(theta)
+	# input()
+	thetan = deepcopy(theta)
+	parentgoalsn = deepcopy(parentgoals)
+	if thetan["meta_fail"]:
+		# print("fail")
 		return
 	elif len(goals) == 0:
-		yield theta
+		yield thetan
 	else:
 		first = goals[0]
 		rest = goals[1:]
-		for theta1 in fol_bc_or(kb, substitute(theta, first), theta):
-			for theta2 in fol_bc_and(kb, rest, theta1):
+		for theta1 in fol_bc_or(kb, substitute(thetan, first), thetan, parentgoalsn):
+			for theta2 in fol_bc_and(kb, rest, theta1, parentgoalsn):
+				# print("theta2: " + str(theta2) )
 				yield theta2
 
 
 def substitute(theta, clause):
+	# print(theta)
+	# print(clause)
 	args = []
 	for arg in clause[2]:
-		if arg[1] == 'v' and arg[0] in theta:
-			args.append(theta[arg[0]])
+		if arg[1] == 'v' and arg in theta:
+			args.append(theta[arg])
 		else:
 			args.append(arg)
+	# print ("args"+ str(args))
 	return (clause[0], clause[1], args)
 
 
 def fol_bc_ask(kb, query):
-	return fol_bc_or(kb, query, {"meta_fail": False})
+	return fol_bc_or(kb, query, {"meta_fail": False}, [])
 
 
 def main(argv):
@@ -183,10 +226,19 @@ def main(argv):
 		if opt == "-i":
 			inputfile = arg
 	f2 = open("output.txt", "w")
-	f2.close()
 	query, kb = getInput(inputfile)
-	# pprint.pprint(query)
+	# kb.printKB()
+	# print ("----------")
+	for q in query:
+		res = list(fol_bc_ask(kb, q))
+		# print(res)
+		if len(res) == 0:
+			f2.write("FALSE\n")
+		else:
+			# print(res)
+			f2.write("TRUE\n")
+
 
 if __name__ == "__main__":
-	# main(sys.argv[1:])
-	unify_test()
+	main(sys.argv[1:])
+	# unify_test()
