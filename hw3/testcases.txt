@@ -1,0 +1,126 @@
+1
+~A(Sim)
+2
+A(x) => B(x)
+~B(Sim)
+
+1
+Uncle(John,Sarah)
+8
+Male(x) ^ Parent(y,z) ^ Sibling(x,y) => Uncle(x,z)
+Father(x,y) => Parent(x,y)
+Mother(x,y) => Parent(x,y)
+Parent(x,p) ^ Parent(x,w) => Sibling(p,w)
+Male(John)
+Mother(Nicole,Sarah)
+Father(Shawn,Nicole)
+Father(Shawn,John)
+
+1
+Criminal(West)
+8
+American(x) ^ Weapon(y) ^ Sells(x,y,z) ^ Hostile(z) => Criminal(x)
+Owns(None, M1)
+Missile(M1)
+Missile(x) ^ Owns(Nono,x) => Sells(West,x,Nono)
+Missile(x) => Weapon(x)
+Enemy(x,America) => Hostile(x)
+American(West)
+Enemy(None,America)
+
+
+1
+F(B,A)
+3
+G(x,y) => F(y,x)
+F(S,SS) => G(x,y)
+G(SS,S)
+
+1
+A(John)
+2
+B(x) => A(x)
+A(x) => B(x)
+
+1
+A(John)
+6
+B(x) => A(x)
+A(x) => B(x)
+C(y) => A(x)
+D(x) => C(x)
+E(x) => D(Rob)
+E(Rob)
+
+5
+A(John)
+E(Rob)
+B(Rob)
+A(Bill)
+C(Bill)
+6
+B(x) => A(x)
+A(x) => B(x)
+C(y) => A(x)
+D(x) => C(x)
+E(x) => D(Rob)
+E(Rob)
+
+TRUE
+TRUE
+TRUE
+TRUE
+FALSE
+
+1
+H(Bob)
+3
+D(z,y) => H(x)
+A(y) => D(x,x)
+A(Bob)
+
+TRUE
+
+8
+Siblings(Reshmi,Amanda)
+Siblings(Reshmi,Elena)
+Triples(Amanda,Preethi,Suresh)
+Triples(Child1,Child2,Child3)
+Triples(Child1,Child2,Suresh)
+Triples(Amanda,Elena,Preethi)
+Triples(Amanda,Suresh,Preethi)
+Triples(Child1,Suresh,Child2)
+33
+Family(a,b,c,d) ^ Family(e,f,g,b) ^ Family(h,i,j,a) => OverallFamily(a,b,c,d,e,f,g,h,i,j)
+Male(x) ^ Female(y) ^ Married(x,y) ^ Siblings(z,a) => Family(x,y,z,a)
+Parent(x,c) ^ Parent(x,d) ^ Parent(y,c) ^ Parent(y,d) ^ Married(x,y) => Siblings(c,d)
+Siblings(x,y) => SameFamily(x,y)
+SameFamily(a,x) ^ SameFamily(a,y) => Triples(x,y,z)
+Father(x,y) => Parent(x,y)
+Mother(x,y) => Parent(x,y)
+Father(z,y) ^ Married(z,x) => Parent(x,y)
+Mother(z,y) ^ Married(x,z) => Parent(x,y)
+Male(John)
+Male(Bob)
+Male(Nishant)
+Female(Christina)
+Female(Emily)
+Female(Amanda)
+InRelationship(John,Christina)
+InRelationship(Bob,Emily)
+InRelationship(Nishant,Amanda)
+Father(Nishant,Anirban)
+Father(Bob,Suresh)
+Mother(Christina,Amanda)
+Mother(Christina,Elena)
+Mother(Christina,Preethi)
+Mother(Christina,Reshmi)
+Male(x) ^ Female(y) ^ InRelationship(x,y) => Married(x,y)
+Mother(Emily,Nishant)
+Mother(Amanda,Vipin)
+Male(Batman)
+Female(Catwomen)
+Mother(Catwomen,Child1)
+Mother(Catwomen,Child2)
+Mother(Catwomen,Child3)
+InRelationship(Batman,Catwomen)

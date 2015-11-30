@@ -106,24 +106,24 @@ def unify(x, y, theta):
 	# pprint.pprint(y)
 	# pprint.pprint(theta)
 	# print("-------------")
-	theta = deepcopy(theta)
-	if theta["meta_fail"]:
+	thetan = deepcopy(theta)
+	if thetan["meta_fail"]:
 		return {"meta_fail": True}
 	elif x == y:
 		# nt ("test")
-		return theta
+		return thetan
 	elif len(x) == 1 and x[0][1] == 'v' and len(y) == 1:
-		return unify_var(x[0], y[0], theta)
+		return unify_var(x[0], y[0], thetan)
 	elif len(y) == 1 and y[0][1] == 'v' and len(x) == 1:
-		return unify_var(y[0], x[0], theta)
+		return unify_var(y[0], x[0], thetan)
 	elif len(x) > 1 and len(y) > 1:
-		return unify(x[1:], y[1:], unify(x[:1], y[:1], theta))
+		return unify(x[1:], y[1:], unify(x[:1], y[:1], thetan))
 	else:
 		return {"meta_fail": True}
 
 
-def unify_var(var, x, theta):
-	theta = deepcopy(theta)
+def unify_var(var, x, thetan):
+	theta = deepcopy(thetan)
 	# pprint.pprint(var)
 	# pprint.pprint(x)
 	# pprint.pprint(theta)
@@ -158,18 +158,24 @@ def standardize_variables(rule):
 
 
 def fol_bc_or(kb, goal, theta, parentgoals):
-	# pprint.pprint(goal)
+	print("goal")
+	#pprint.pprint(goal)
+	
 	# pprint.pprint(theta)
 	# print("-----------")
 	# print (goal)
 	thetan = deepcopy(theta)
 	parentgoalsn = deepcopy(parentgoals)
+	print("parentgoals")
+	#pprint.pprint(parentgoalsn)
+	# input()
 	for arg in goal[2]:
 		if arg[1] == 'v':
 			break
 	else:  # no-break
 		if goal in parentgoalsn:
 			thetan["meta_fail"] = True
+			print ("loop break")
 			yield thetan
 	parentgoalsn.append(goal)
 	for rule in kb.fetch_rules_for_goal(goal):
@@ -184,15 +190,19 @@ def fol_bc_or(kb, goal, theta, parentgoals):
 
 
 def fol_bc_and(kb, goals, theta, parentgoals):
+	print("goals")
+	#pprint.pprint(goals)
 	# print(goals)
 	# print(theta)
 	# input()
 	thetan = deepcopy(theta)
 	parentgoalsn = deepcopy(parentgoals)
 	if thetan["meta_fail"]:
-		# print("fail")
+		print("fail")
 		return
 	elif len(goals) == 0:
+		print("theta")
+		pprint.pprint(thetan)
 		yield thetan
 	else:
 		first = goals[0]
@@ -230,14 +240,16 @@ def main(argv):
 	# kb.printKB()
 	# print ("----------")
 	for q in query:
-		res = list(fol_bc_ask(kb, q))
-		# print(res)
-		if len(res) == 0:
-			f2.write("FALSE\n")
-		else:
-			# print(res)
+		flag = False
+		for res in fol_bc_ask(kb, q):
+		#res = list(fol_bc_ask(kb, q))
 			f2.write("TRUE\n")
-
+			f2.flush()
+			flag = True
+			break
+		if not flag:
+			f2.write("FALSE\n")
+			f2.flush()
 
 if __name__ == "__main__":
 	main(sys.argv[1:])
