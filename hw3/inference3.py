@@ -26,12 +26,15 @@ class KB():
 
 	def fetch_rules_for_goal(self, goal):
 		# print ("goal" + str(goal))
+		rules = []
 		if goal[0:2] in self.clauses:
 			# print ("here")
 			for rule in self.clauses[goal[0:2]]:
 				# print ("Rule" + str(rule))
-				yield rule
+				# yield rule
+				rules.append(rule)
 				# return rule
+		return rules
 
 	def printKB(self):
 		pprint.pprint(self.clauses)
@@ -157,17 +160,21 @@ def standardize_variables(rule):
 	return rule
 
 
-def fol_bc_or(kb, goal, theta, parentgoals):
-	print("goal")
-	#pprint.pprint(goal)
-	
+def fol_bc_or(kb, goal, theta, parentgoals, i):
+	# print("goal")
+	# pprint.pprint(goal)
+	# for j in range(0, i):
+		# fsim.write("\t")
+	# fsim.write(goal)
+	# pprint.pprint(goal, fsim)
+	# fsim.flush()
 	# pprint.pprint(theta)
 	# print("-----------")
 	# print (goal)
 	thetan = deepcopy(theta)
 	parentgoalsn = deepcopy(parentgoals)
-	print("parentgoals")
-	#pprint.pprint(parentgoalsn)
+	# print("parentgoals")
+	# pprint.pprint(parentgoalsn)
 	# input()
 	for arg in goal[2]:
 		if arg[1] == 'v':
@@ -175,40 +182,42 @@ def fol_bc_or(kb, goal, theta, parentgoals):
 	else:  # no-break
 		if goal in parentgoalsn:
 			thetan["meta_fail"] = True
-			print ("loop break")
+			# print ("loop break")
 			yield thetan
 	parentgoalsn.append(goal)
-	for rule in kb.fetch_rules_for_goal(goal):
+	rules = kb.fetch_rules_for_goal(goal)
+	for rule in rules:
+		# print (len(rules))
 		rhs, lhs = standardize_variables(rule)
 		# print("goal:" + str(goal))
 		# print(rhs)
 		# print(lhs)
 		# print("theta: "+ str(thetan))
-		for theta1 in fol_bc_and(kb, lhs, unify(rhs[2], goal[2], thetan), parentgoalsn):
+		for theta1 in fol_bc_and(kb, lhs, unify(rhs[2], goal[2], thetan), parentgoalsn, i):
 			# print("theta1: " + str(theta))
 			yield theta1
 
 
-def fol_bc_and(kb, goals, theta, parentgoals):
-	print("goals")
-	#pprint.pprint(goals)
+def fol_bc_and(kb, goals, theta, parentgoals, i):
+	# print("goals")
+	# pprint.pprint(goals)
 	# print(goals)
 	# print(theta)
 	# input()
 	thetan = deepcopy(theta)
 	parentgoalsn = deepcopy(parentgoals)
 	if thetan["meta_fail"]:
-		print("fail")
+		# print("fail")
 		return
 	elif len(goals) == 0:
-		print("theta")
-		pprint.pprint(thetan)
+		# print("theta")
+		# pprint.pprint(thetan)
 		yield thetan
 	else:
-		first = goals[0]
-		rest = goals[1:]
-		for theta1 in fol_bc_or(kb, substitute(thetan, first), thetan, parentgoalsn):
-			for theta2 in fol_bc_and(kb, rest, theta1, parentgoalsn):
+		first = deepcopy(goals[0])
+		rest = deepcopy(goals[1:])
+		for theta1 in fol_bc_or(kb, substitute(thetan, first), thetan, parentgoalsn, i+1):
+			for theta2 in fol_bc_and(kb, rest, theta1, parentgoalsn, i):
 				# print("theta2: " + str(theta2) )
 				yield theta2
 
@@ -227,7 +236,7 @@ def substitute(theta, clause):
 
 
 def fol_bc_ask(kb, query):
-	return fol_bc_or(kb, query, {"meta_fail": False}, [])
+	return fol_bc_or(kb, query, {"meta_fail": False}, [], 0)
 
 
 def main(argv):
